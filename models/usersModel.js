@@ -8,7 +8,7 @@ exports.createNewUser = async (userData) => {
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  const queryString = `INSERT INTO users (name, user_id, email, password) VALUES ('${name}', '${userId}', '${email}', '${hashedPassword}')`;
+  const queryString = `INSERT INTO users (name, user_id, email, password, password_changed_at) VALUES ('${name}', '${userId}', '${email}', '${hashedPassword}', '${new Date().toUTCString()}')`;
 
   try {
     await pool.query(queryString);
@@ -32,6 +32,7 @@ exports.updateUser = async (userData) => {
     updateQuery.push(
       `password = '${await bcrypt.hash(userData.password, 12)}'`
     );
+    updateQuery.push(`password_changed_at = '${new Date().toUTCString()}'`);
   }
 
   const queryString = `UPDATE users SET ${updateQuery.join(
