@@ -11,8 +11,10 @@
   "author": "Akshat Trivedi",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
-    "pg": "^8.7.1"
+    "pg": "^8.7.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "dotenv": "^10.0.0",
