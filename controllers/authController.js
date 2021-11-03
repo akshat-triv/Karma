@@ -1,4 +1,6 @@
 const JWT = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { promisify } = require('util');
 const { v4: uuidv4 } = require('uuid');
 
 const usersModel = require('./../models/usersModel.js');
@@ -45,4 +47,35 @@ exports.signup = async (req, res) => {
   if (statusCode === 201)
     sendToken(201, 'User created successfully.', userId, req, res);
   else res.status(statusCode).json(result);
+};
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
+  const result = await usersModel.getUserWithEmail(email);
+
+  const user = result.data[0];
+
+  if (!user) {
+    res
+      .status(401)
+      .json({ status: 'fail', message: 'Invalid email or password' });
+
+    return;
+  }
+
+  const passwordCheck = await promisify(bcrypt.compare)(
+    password,
+    user.password
+  );
+
+  if (!passwordCheck) {
+    res
+      .status(401)
+      .json({ status: 'fail', message: 'Invalid email or password' });
+
+    return;
+  }
+
+  sendToken(200, 'User login successfully.', user.user_id, req, res);
 };

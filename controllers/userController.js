@@ -23,7 +23,7 @@ exports.getAllUser = async (_, res) => {
 
 exports.getUser = async (req, res) => {
   const userId = req.params.userId;
-  const result = await usersModel.getUser(userId);
+  const result = await usersModel.getUserWithUserId(userId);
 
   const statusCode = result.status === 'success' ? 200 : 500;
   res.status(statusCode).json(result);

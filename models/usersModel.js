@@ -77,8 +77,23 @@ exports.deleteUser = async (userdId) => {
   }
 };
 
-exports.getUser = async (userId) => {
+exports.getUserWithUserId = async (userId) => {
   const queryString = `SELECT * FROM users WHERE user_id = '${userId}'`;
+
+  try {
+    const result = await pool.query(queryString);
+    return {
+      status: 'success',
+      data: result.rows,
+      message: 'Data fetched successfully.',
+    };
+  } catch (error) {
+    return { status: 'fail', message: error.message };
+  }
+};
+
+exports.getUserWithEmail = async (userEmail) => {
+  const queryString = `SELECT * FROM users WHERE email = '${userEmail}'`;
 
   try {
     const result = await pool.query(queryString);
