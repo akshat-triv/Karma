@@ -23,6 +23,10 @@ router.get('/logout', logout);
 
 router.route('/').get(getAllUser).post(createNewUser);
 
-router.route('/:userId').get(getUser).patch(updateUserData).delete(deleteUser);
+router
+  .route('/:userId')
+  .get(getUser)
+  .patch(protect, updateUserData)
+  .delete(deleteUser);
 
 module.exports = router;

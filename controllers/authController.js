@@ -52,9 +52,7 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
-  const result = await usersModel.getUserWithEmail(email);
-
-  const user = result.data[0];
+  const { user } = await usersModel.getUserWithEmail(email);
 
   if (!user) {
     res
@@ -80,7 +78,7 @@ exports.login = async (req, res) => {
   sendToken(200, 'User login successfully.', user.user_id, req, res);
 };
 
-exports.logout = (req, res, next) => {
+exports.logout = (_, res) => {
   res.cookie('JWT', undefined, {
     expires: new Date(Date.now() + 1000),
     httpOnly: true,
@@ -110,14 +108,24 @@ exports.protect = async (req, res, next) => {
   //2) Verification of the Token
   const decoded = await promisify(JWT.verify)(token, process.env.JWT_SECRET);
 
-  const { data } = await usersModel.getUserWithUserId(decoded.userId);
-
-  const user = data[0];
+  const { user } = await usersModel.getUserWithUserId(decoded.userId);
 
   if (!user) {
     return res
       .status(401)
       .json({ status: 'fail', message: "User doesn't exist anymore" });
+  }
+
+  if (
+    await usersModel.checkPasswordChanged(
+      user.user_id,
+      new Date(decoded.iat * 1000).toUTCString()
+    )
+  ) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'Password been changed recently, please login again.',
+    });
   }
 
   req.user = user;

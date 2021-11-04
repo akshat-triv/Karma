@@ -28,12 +28,13 @@ exports.updateUser = async (userData) => {
   if (userData.email) {
     updateQuery.push(`email = '${userData.email}'`);
   }
-  if (userData.password) {
-    updateQuery.push(
-      `password = '${await bcrypt.hash(userData.password, 12)}'`
-    );
-    updateQuery.push(`password_changed_at = '${new Date().toUTCString()}'`);
-  }
+  // Password cannot be updated this way.
+  // if (userData.password) {
+  //   updateQuery.push(
+  //     `password = '${await bcrypt.hash(userData.password, 12)}'`
+  //   );
+  //   updateQuery.push(`password_changed_at = '${new Date().toUTCString()}'`);
+  // }
 
   const queryString = `UPDATE users SET ${updateQuery.join(
     ','
@@ -55,7 +56,8 @@ exports.getAllUsers = async () => {
     const result = await pool.query(queryString);
     return {
       status: 'success',
-      data: result.rows,
+      length: result.rows.length,
+      users: result.rows,
       message: 'Data fetched successfully.',
     };
   } catch (error) {
@@ -84,7 +86,7 @@ exports.getUserWithUserId = async (userId) => {
     const result = await pool.query(queryString);
     return {
       status: 'success',
-      data: result.rows,
+      user: result.rows[0],
       message: 'Data fetched successfully.',
     };
   } catch (error) {
@@ -99,7 +101,22 @@ exports.getUserWithEmail = async (userEmail) => {
     const result = await pool.query(queryString);
     return {
       status: 'success',
-      data: result.rows,
+      user: result.rows[0],
+      message: 'Data fetched successfully.',
+    };
+  } catch (error) {
+    return { status: 'fail', message: error.message };
+  }
+};
+
+exports.checkPasswordChanged = async (userId, jwtIssuiedAt) => {
+  const queryString = `SELECT password_changed_at > '${jwtIssuiedAt}' FROM users WHERE user_id = '${userId}'`;
+
+  try {
+    const result = await pool.query(queryString);
+    return {
+      status: 'success',
+      result: result.rows[0],
       message: 'Data fetched successfully.',
     };
   } catch (error) {
