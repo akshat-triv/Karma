@@ -79,3 +79,47 @@ exports.login = async (req, res) => {
 
   sendToken(200, 'User login successfully.', user.user_id, req, res);
 };
+
+exports.logout = (req, res, next) => {
+  res.cookie('JWT', undefined, {
+    expires: new Date(Date.now() + 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+};
+
+exports.protect = async (req, res, next) => {
+  // Checking if the token came in
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.JWT) {
+    token = req.cookies.JWT;
+  }
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ status: 'fail', message: 'Please login or signup to access' });
+  }
+
+  //2) Verification of the Token
+  const decoded = await promisify(JWT.verify)(token, process.env.JWT_SECRET);
+
+  const { data } = await usersModel.getUserWithUserId(decoded.userId);
+
+  const user = data[0];
+
+  if (!user) {
+    return res
+      .status(401)
+      .json({ status: 'fail', message: "User doesn't exist anymore" });
+  }
+
+  req.user = user;
+  next();
+};

@@ -8,11 +8,18 @@ const {
   deleteUser,
 } = require('../controllers/userController.js');
 
-const { signup, login } = require('../controllers/authController.js');
+const {
+  signup,
+  login,
+  logout,
+  protect,
+} = require('../controllers/authController.js');
 
 router.post('/signup', signup);
 
 router.post('/login', login);
+
+router.get('/logout', logout);
 
 router.route('/').get(getAllUser).post(createNewUser);
 
