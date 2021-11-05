@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const pool = new Pool();
 
@@ -28,13 +29,6 @@ exports.updateUser = async (userData) => {
   if (userData.email) {
     updateQuery.push(`email = '${userData.email}'`);
   }
-  // Password cannot be updated this way.
-  // if (userData.password) {
-  //   updateQuery.push(
-  //     `password = '${await bcrypt.hash(userData.password, 12)}'`
-  //   );
-  //   updateQuery.push(`password_changed_at = '${new Date().toUTCString()}'`);
-  // }
 
   const queryString = `UPDATE users SET ${updateQuery.join(
     ','
@@ -109,15 +103,75 @@ exports.getUserWithEmail = async (userEmail) => {
   }
 };
 
-exports.checkPasswordChanged = async (userId, jwtIssuiedAt) => {
-  const queryString = `SELECT password_changed_at > '${jwtIssuiedAt}' FROM users WHERE user_id = '${userId}'`;
+exports.getUserWithResetToken = async (resetToken) => {
+  const timeNow = new Date(Date.now()).toUTCString();
+  const queryString = `SELECT * FROM users WHERE password_reset_token = '${resetToken}' AND password_reset_expires > '${timeNow}'`;
 
   try {
     const result = await pool.query(queryString);
     return {
       status: 'success',
+      user: result.rows[0],
+      message: 'Data fetched successfully.',
+    };
+  } catch (error) {
+    return { status: 'fail', message: error.message };
+  }
+};
+
+exports.checkPasswordChanged = async (userId, jwtIssuiedAt) => {
+  const queryString = `SELECT password_changed_at < '${jwtIssuiedAt}' AS isvalid  FROM users WHERE user_id = '${userId}'`;
+
+  try {
+    const result = await pool.query(queryString);
+
+    return {
+      status: 'success',
       result: result.rows[0],
       message: 'Data fetched successfully.',
+    };
+  } catch (error) {
+    return { status: 'fail', message: error.message };
+  }
+};
+
+exports.createPasswordResetToken = async (email) => {
+  const token = crypto.randomBytes(32).toString('hex');
+
+  const encryptedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  const tokenExpiry = new Date(Date.now() + 10 * 60 * 1000).toUTCString();
+
+  const updateQuery = `UPDATE users SET password_reset_token = '${encryptedToken}', password_reset_expires = '${tokenExpiry}' WHERE email = '${email}'`;
+
+  try {
+    await pool.query(updateQuery);
+
+    return {
+      status: 'success',
+      message: 'Set reset token successfully.',
+      token,
+    };
+  } catch (error) {
+    return { status: 'fail', message: error.message };
+  }
+};
+
+exports.updatePassword = async (password, userId) => {
+  const timeNow = new Date(Date.now()).toUTCString();
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  const updateQuery = `UPDATE users SET password = '${hashedPassword}', password_changed_at = '${timeNow}', password_reset_token = NULL, password_reset_expires = NULL WHERE user_id = '${userId}'`;
+
+  try {
+    await pool.query(updateQuery);
+
+    return {
+      status: 'success',
+      message: 'Updated password successfully.',
     };
   } catch (error) {
     return { status: 'fail', message: error.message };

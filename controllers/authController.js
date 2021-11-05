@@ -1,5 +1,6 @@
 const JWT = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { promisify } = require('util');
 const { v4: uuidv4 } = require('uuid');
 
@@ -116,12 +117,12 @@ exports.protect = async (req, res, next) => {
       .json({ status: 'fail', message: "User doesn't exist anymore" });
   }
 
-  if (
-    await usersModel.checkPasswordChanged(
-      user.user_id,
-      new Date(decoded.iat * 1000).toUTCString()
-    )
-  ) {
+  const { result } = await usersModel.checkPasswordChanged(
+    user.user_id,
+    new Date(decoded.iat * 1000).toUTCString()
+  );
+
+  if (!result.isvalid) {
     return res.status(401).json({
       status: 'fail',
       message: 'Password been changed recently, please login again.',
@@ -130,4 +131,75 @@ exports.protect = async (req, res, next) => {
 
   req.user = user;
   next();
+};
+
+exports.forgotPassword = async (req, res) => {
+  const { user } = await usersModel.getUserWithEmail(req.body.email);
+
+  if (!user) {
+    res.status(400).json({ status: 'fail', message: 'No such user exist.' });
+    return;
+  }
+
+  const result = await usersModel.createPasswordResetToken(user.email);
+
+  if (result.status !== 'success')
+    res.status(400).json({ status: result.status, message: result.message });
+
+  // Send the user an email for the token, for now just returning it in the response
+
+  res.status(201).json(result);
+};
+
+exports.resetPassword = async (req, res) => {
+  const { resetToken } = req.params;
+  const { password } = req.body;
+
+  const encryptedToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  const { user } = await usersModel.getUserWithResetToken(encryptedToken);
+
+  if (!user) {
+    res.status(400).json({
+      status: 'fail',
+      message: 'Invalid token. Token must have expired.',
+    });
+    return;
+  }
+
+  const result = await usersModel.updatePassword(password, user.user_id);
+
+  if (result.status !== 'success') {
+    res.status(500).json(result);
+    return;
+  }
+
+  sendToken(200, 'Password updated successfully.', user.user_id, req, res);
+};
+
+exports.updatePassword = async (req, res) => {
+  const { user } = req;
+  const { passwordCurrent, passwordNew } = req.body;
+
+  const passwordCheck = await promisify(bcrypt.compare)(
+    passwordCurrent,
+    user.password
+  );
+
+  if (!passwordCheck) {
+    res.status(401).json({ status: 'fail', message: 'Incorrect password.' });
+    return;
+  }
+
+  const result = await usersModel.updatePassword(passwordNew, user.user_id);
+
+  if (result.status !== 'success') {
+    res.status(500).json(result);
+    return;
+  }
+
+  sendToken(200, 'Password updated successfully.', user.user_id, req, res);
 };
