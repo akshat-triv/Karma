@@ -6,6 +6,7 @@ const {
   getUser,
   updateUserData,
   deleteUser,
+  updateMe,
 } = require('../controllers/userController.js');
 
 const {
@@ -29,6 +30,8 @@ router.post('/forgotPassword', forgotPassword);
 router.post('/resetPassword/:resetToken', resetPassword);
 
 router.post('/updatePassword', protect, updatePassword);
+
+router.post('/updateMe', protect, updateMe);
 
 router.route('/').get(getAllUser).post(createNewUser);
 

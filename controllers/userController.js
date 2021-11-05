@@ -40,6 +40,21 @@ exports.updateUserData = async (req, res) => {
   res.status(statusCode).json(result);
 };
 
+exports.updateMe = async (req, res) => {
+  const { user } = req;
+  const { email, name } = req.body;
+
+  const result = await usersModel.updateUser({
+    email,
+    name,
+    userId: user.user_id,
+  });
+
+  const statusCode = result.status === 'success' ? 200 : 500;
+
+  res.status(statusCode).json({ result });
+};
+
 exports.deleteUser = async (req, res) => {
   const userId = req.params.userId;
 
