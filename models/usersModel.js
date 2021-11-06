@@ -120,7 +120,7 @@ exports.getUserWithResetToken = async (resetToken) => {
 };
 
 exports.checkPasswordChanged = async (userId, jwtIssuiedAt) => {
-  const queryString = `SELECT password_changed_at < '${jwtIssuiedAt}' AS isvalid  FROM users WHERE user_id = '${userId}'`;
+  const queryString = `SELECT password_changed_at <= '${jwtIssuiedAt}' AS isvalid  FROM users WHERE user_id = '${userId}'`;
 
   try {
     const result = await pool.query(queryString);

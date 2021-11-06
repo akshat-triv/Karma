@@ -117,9 +117,11 @@ exports.protect = async (req, res, next) => {
       .json({ status: 'fail', message: "User doesn't exist anymore" });
   }
 
+  const jwtIssuiedAt = new Date(decoded.iat * 1000).toUTCString();
+
   const { result } = await usersModel.checkPasswordChanged(
     user.user_id,
-    new Date(decoded.iat * 1000).toUTCString()
+    jwtIssuiedAt
   );
 
   if (!result.isvalid) {
