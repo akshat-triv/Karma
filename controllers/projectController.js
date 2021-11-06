@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 
 const projectsModel = require('./../models/projectsModel.js');
+const usersProjectsRelModel = require('./../models/usersProjectsRelModel.js');
 
 exports.createNewProject = async (req, res) => {
   const { name, description } = req.body;
@@ -14,7 +15,15 @@ exports.createNewProject = async (req, res) => {
     projectId,
   });
 
-  const statusCode = result.status === 'success' ? 201 : 500;
+  const result2 = await usersProjectsRelModel.insertNewRelation({
+    userId: createdBy,
+    projectId,
+    designation: 'creater',
+    userType: 'admin',
+  });
+
+  const statusCode =
+    result.status === 'success' && result2.status === 'success' ? 201 : 500;
 
   res.status(statusCode).json(result);
 };

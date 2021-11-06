@@ -5,7 +5,7 @@ dotenv.config({ path: './../config.env' });
 const pool = new Pool();
 
 const createUsersTable =
-  'CREATE TABLE users (name VARCHAR(100), user_id VARCHAR(50) PRIMARY KEY, email VARCHAR(100), password VARCHAR(200), password_changed_at TIMESTAMP, password_reset_token VARCHAR(200) DEFAULT NULL, password_reset_expires TIMESTAMP DEFAULT NULL)';
+  'CREATE TABLE users (name VARCHAR(100), user_id VARCHAR(50) PRIMARY KEY, email VARCHAR(100), password VARCHAR(200), password_changed_at TIMESTAMP DEFAULT NULL, password_reset_token VARCHAR(200) DEFAULT NULL, password_reset_expires TIMESTAMP DEFAULT NULL)';
 
 const createProjectsTable =
   'CREATE TABLE projects (name VARCHAR(100), description VARCHAR(2000), project_id VARCHAR(50) PRIMARY KEY, created_by VARCHAR(50) REFERENCES users(user_id), created_at TIMESTAMP NOT NULL)';
@@ -13,7 +13,7 @@ const createProjectsTable =
 const userType = "CREATE TYPE usert AS ENUM ('admin', 'normal')";
 
 const createUsersProjectsRelationsTable =
-  'CREATE TABLE users_projects_relations (user_id VARCHAR(20) REFERENCES users(user_id) ON DELETE CASCADE, project_id VARCHAR(20) REFERENCES projects(project_id) ON DELETE CASCADE, designation VARCHAR(50), user_type usert)';
+  'CREATE TABLE users_projects_relations (user_id VARCHAR(50) REFERENCES users(user_id) ON DELETE CASCADE, project_id VARCHAR(50) REFERENCES projects(project_id) ON DELETE CASCADE, designation VARCHAR(50), user_type usert)';
 
 (async () => {
   try {
