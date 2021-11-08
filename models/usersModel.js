@@ -135,14 +135,16 @@ exports.checkPasswordChanged = async (userId, jwtIssuiedAt) => {
   }
 };
 
-exports.createPasswordResetToken = async (email) => {
+exports.createPasswordResetToken = async (email, tokenExpiry = undefined) => {
   const token = crypto.randomBytes(32).toString('hex');
 
   const encryptedToken = crypto
     .createHash('sha256')
     .update(token)
     .digest('hex');
-  const tokenExpiry = new Date(Date.now() + 10 * 60 * 1000).toUTCString();
+
+  if (!tokenExpiry)
+    tokenExpiry = new Date(Date.now() + 10 * 60 * 1000).toUTCString();
 
   const updateQuery = `UPDATE users SET password_reset_token = '${encryptedToken}', password_reset_expires = '${tokenExpiry}' WHERE email = '${email}'`;
 

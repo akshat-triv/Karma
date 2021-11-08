@@ -6,9 +6,15 @@ const {
   getProjectWithProjectId,
   updateProjectData,
   deleteProject,
+  addNewUserToProject,
+  getAllUsersInProject,
 } = require('./../controllers/projectController.js');
 
 const { protect } = require('./../controllers/authController.js');
+
+router.post('/addNewUser/:projectId', protect, addNewUserToProject);
+
+router.get('/getAllUsers/:projectId', getAllUsersInProject);
 
 router.route('/').post(protect, createNewProject).get(getAllProjects);
 
