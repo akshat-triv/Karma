@@ -56,6 +56,7 @@ exports.updateProjectData = async (req, res) => {
   const { name, description } = req.body;
   const { projectId } = req.params;
 
+  // Checking if the project exists
   const { projectExists } = await projectsModel.doesProjectExists(projectId);
 
   if (!projectExists) {
@@ -176,7 +177,7 @@ exports.addNewUserToProject = async (req, res) => {
 
     const result = await usersModel.createNewUser({
       name: newUserName,
-      email: newUserPassword,
+      email: newUserEmail,
       userId: newUserId,
       password: newUserPassword,
     });

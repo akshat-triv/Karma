@@ -5,7 +5,7 @@ dotenv.config({ path: './../config.env' });
 const pool = new Pool();
 
 const createUsersTable =
-  'CREATE TABLE users (name VARCHAR(100), user_id VARCHAR(50) PRIMARY KEY, email VARCHAR(100), password VARCHAR(200), password_changed_at TIMESTAMP DEFAULT NULL, password_reset_token VARCHAR(200) DEFAULT NULL, password_reset_expires TIMESTAMP DEFAULT NULL)';
+  'CREATE TABLE users (name VARCHAR(100), user_id VARCHAR(50) PRIMARY KEY, email VARCHAR(100) UNIQUE, password VARCHAR(200), password_changed_at TIMESTAMP DEFAULT NULL, password_reset_token VARCHAR(200) DEFAULT NULL, password_reset_expires TIMESTAMP DEFAULT NULL)';
 
 const createProjectsTable =
   'CREATE TABLE projects (name VARCHAR(100), description VARCHAR(2000), project_id VARCHAR(50) PRIMARY KEY, created_by VARCHAR(50) REFERENCES users(user_id), created_at TIMESTAMP NOT NULL)';
