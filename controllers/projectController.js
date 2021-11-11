@@ -218,6 +218,7 @@ exports.addNewUserToProject = async (req, res) => {
 
   if (result2.status === 'fail') {
     res.status(500).json(result2);
+    return;
   }
 
   res.status(201).json(responseObj);

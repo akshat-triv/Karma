@@ -33,6 +33,8 @@ router.post('/updatePassword', protect, updatePassword);
 
 router.post('/updateMe', protect, updateMe);
 
+router.post('/invite/:resetToken', resetPassword);
+
 router.route('/').get(getAllUser).post(createNewUser);
 
 router
