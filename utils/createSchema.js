@@ -13,10 +13,13 @@ const createProjectsTable =
 const userType = "CREATE TYPE usert AS ENUM ('admin', 'normal')";
 
 const createUsersProjectsRelationsTable =
-  'CREATE TABLE users_projects_relations (user_id VARCHAR(50) REFERENCES users(user_id) ON DELETE CASCADE, project_id VARCHAR(50) REFERENCES projects(project_id) ON DELETE CASCADE, designation VARCHAR(50), user_type usert)';
+  'CREATE TABLE users_projects_relations (user_id VARCHAR(50) REFERENCES users(user_id) ON DELETE CASCADE, project_id VARCHAR(50) REFERENCES projects(project_id) ON DELETE CASCADE, designation VARCHAR(50), user_type usert, active BOOLEAN DEFAULT true)';
+
+const notificationType =
+  "CREATE TYPE notificationt AS ENUM ('project-invite', 'normal')";
 
 const createNotificationsTable =
-  'CREATE TABLE notifications (user_id VARCHAR(50) REFERENCES users(user_id), sent_by VARCHAR(50) REFERENCES users(user_id), sent_at TIMESTAMP NOT NULL, message VARCHAR(200), received_at TIMESTAMP)';
+  'CREATE TABLE notifications (user_id VARCHAR(50) REFERENCES users(user_id), sent_by VARCHAR(50) REFERENCES users(user_id), sent_at TIMESTAMP NOT NULL, message VARCHAR(200), received_at TIMESTAMP, action_type notificationt, action_info VARCHAR(50))';
 
 (async () => {
   try {
@@ -31,6 +34,8 @@ const createNotificationsTable =
     console.log('Declared a custom Enum type: usert');
     await pool.query(createUsersProjectsRelationsTable);
     console.log('Created users_projects_relations table successfully');
+    await pool.query(notificationType);
+    console.log('Declared a custom Enum type: notificationt');
     await pool.query(createNotificationsTable);
     console.log('Created notifications table successfully');
   } catch (error) {
