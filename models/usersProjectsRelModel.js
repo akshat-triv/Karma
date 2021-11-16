@@ -7,10 +7,11 @@ exports.insertNewRelation = async ({
   projectId,
   designation,
   userType,
+  active = false,
 }) => {
-  const queryString = `INSERT INTO users_projects_relations (user_id, project_id, designation, user_type) VALUES ($1, $2, $3, $4)`;
+  const queryString = `INSERT INTO users_projects_relations (user_id, project_id, designation, user_type, active) VALUES ($1, $2, $3, $4, $5)`;
 
-  const values = [userId, projectId, designation, userType];
+  const values = [userId, projectId, designation, userType, active];
 
   try {
     await pool.query(queryString, values);

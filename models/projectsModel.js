@@ -26,14 +26,14 @@ exports.createNewProject = async (projectInfo) => {
 };
 
 exports.doesProjectExists = async (projectId) => {
-  const queryString = `SELECT COUNT(*) > 0 AS projectexists FROM projects WHERE project_id = $1`;
+  const queryString = `SELECT name FROM projects WHERE project_id = $1`;
 
   try {
     const result = await pool.query(queryString, [projectId]);
     return {
       status: 'success',
       message: 'Query run successfully.',
-      projectExists: result.rows[0].projectexists,
+      projectName: result.rows[0].name,
     };
   } catch (error) {
     return {

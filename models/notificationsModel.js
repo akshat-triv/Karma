@@ -2,13 +2,19 @@ const { Pool } = require('pg');
 
 const pool = new Pool();
 
-exports.createNewNotification = async ({ userId, sentBy, message }) => {
+exports.createNewNotification = async ({
+  userId,
+  sentBy,
+  message,
+  actionType,
+  actionInfo,
+}) => {
   const queryString =
-    'INSERT INTO notifications (user_id, sent_by, sent_at, message) VALUES ($1, $2, $3, $4)';
+    'INSERT INTO notifications (user_id, sent_by, sent_at, message, action_type, action_info) VALUES ($1, $2, $3, $4, $5, $6)';
 
   const timeNow = new Date(Date.now()).toUTCString();
 
-  const values = [userId, sentBy, timeNow, message];
+  const values = [userId, sentBy, timeNow, message, actionType, actionInfo];
 
   try {
     await pool.query(queryString, values);

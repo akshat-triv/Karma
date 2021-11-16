@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const projectsModel = require('./../models/projectsModel.js');
 const usersModel = require('./../models/usersModel.js');
 const usersProjectsRelModel = require('./../models/usersProjectsRelModel.js');
+const notificationsModel = require('./../models/notificationsModel.js');
 
 exports.createNewProject = async (req, res) => {
   const { name, description } = req.body;
@@ -21,6 +22,7 @@ exports.createNewProject = async (req, res) => {
     projectId,
     designation: 'creater',
     userType: 'admin',
+    active: true,
   });
 
   const statusCode =
@@ -57,9 +59,9 @@ exports.updateProjectData = async (req, res) => {
   const { projectId } = req.params;
 
   // Checking if the project exists
-  const { projectExists } = await projectsModel.doesProjectExists(projectId);
+  const { projectName } = await projectsModel.doesProjectExists(projectId);
 
-  if (!projectExists) {
+  if (!projectName) {
     res
       .status(404)
       .json({ status: 'fail', message: 'No such project exists.' });
@@ -95,9 +97,9 @@ exports.deleteProject = async (req, res) => {
   const { projectId } = req.params;
 
   // Checking if project even exists.
-  const { projectExists } = await projectsModel.doesProjectExists(projectId);
+  const { projectName } = await projectsModel.doesProjectExists(projectId);
 
-  if (!projectExists) {
+  if (!projectName) {
     res
       .status(404)
       .json({ status: 'fail', message: 'No such project exists.' });
@@ -135,9 +137,9 @@ exports.addNewUserToProject = async (req, res) => {
   const { projectId } = req.params;
 
   // Check if the project exists.
-  const { projectExists } = await projectsModel.doesProjectExists(projectId);
+  const { projectName } = await projectsModel.doesProjectExists(projectId);
 
-  if (!projectExists) {
+  if (!projectName) {
     res
       .status(404)
       .json({ status: 'fail', message: 'No such project exists.' });
@@ -218,6 +220,20 @@ exports.addNewUserToProject = async (req, res) => {
 
   if (result2.status === 'fail') {
     res.status(500).json(result2);
+    return;
+  }
+
+  // sending the invite notification to the user
+  const result4 = await notificationsModel.createNewNotification({
+    userId: newUserId,
+    sentBy: user.user_id,
+    message: `You've been invited by ${user.name} to contribute in their project ${projectName}. Click to accept the invitation.`,
+    actionType: 'project-invite',
+    actionInfo: projectId,
+  });
+
+  if (result4.status === 'fail') {
+    res.status(500).json(result4);
     return;
   }
 
