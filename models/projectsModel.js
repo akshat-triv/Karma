@@ -65,8 +65,6 @@ exports.getProjectWithProjectId = async (projectId) => {
   try {
     const result = await pool.query(queryString);
 
-    console.log(result, [projectId]);
-
     return {
       status: 'success',
       project: result.rows[0],
@@ -110,7 +108,6 @@ exports.deleteProject = async (projectId) => {
 
   try {
     const res = await pool.query(queryString, [projectId]);
-    console.log(res);
     return {
       status: 'success',
       message: 'Deleted project successfully.',

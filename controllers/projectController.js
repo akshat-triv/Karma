@@ -226,8 +226,8 @@ exports.addNewUserToProject = async (req, res) => {
   // sending the invite notification to the user
   const result4 = await notificationsModel.createNewNotification({
     userId: newUserId,
-    sentBy: user.user_id,
-    message: `You've been invited by ${user.name} to contribute in their project ${projectName}. Click to accept the invitation.`,
+    sentBy: req.user.user_id,
+    message: `You've been invited by ${req.user.name} to contribute in their project ${projectName}. Click to accept the invitation.`,
     actionType: 'project-invite',
     actionInfo: projectId,
   });
