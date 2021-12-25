@@ -63,7 +63,7 @@ exports.getProjectWithProjectId = async (projectId) => {
   const queryString = `SELECT * FROM projects WHERE project_id = $1`;
 
   try {
-    const result = await pool.query(queryString);
+    const result = await pool.query(queryString, [projectId]);
 
     return {
       status: 'success',
