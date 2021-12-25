@@ -8,7 +8,7 @@ exports.createNewProject = async (projectInfo) => {
 
   const queryString = `INSERT INTO projects (name, description, project_id, created_by, created_at) VALUES ($1, $2, $3, $4, $5)`;
 
-  const values = [name, description, projectId, createdBy];
+  const values = [name, description, projectId, createdBy, timeNow];
 
   try {
     await pool.query(queryString, values);
